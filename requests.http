@@ -1,0 +1,39 @@
+### Создать заявку
+POST http://127.0.0.1:8000/api/requests
+Accept: application/json
+Content-Type: application/json
+
+{
+    "source": "manual",
+    "phone": "+79001234567",
+    "problem": "Скрипят тормоза при торможении",
+    "client_name": "Алексей",
+    "car_info": "Газель Next, 2021"
+}
+
+### Получить список заявок
+GET http://127.0.0.1:8000/api/requests
+Accept: application/json
+
+### Заявка без телефона (проверка валидации)
+POST http://127.0.0.1:8000/api/requests
+Accept: application/json
+Content-Type: application/json
+
+{
+    "source": "manual",
+    "problem": "Тест без телефона"
+}
+
+### 1. Получить CSRF-cookie
+GET http://localhost:8000/sanctum/csrf-cookie
+
+### 2. Логин
+POST http://localhost:8000/api/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "admin@avto.local",
+    "password": "password"
+}
