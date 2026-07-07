@@ -39,7 +39,7 @@ class RequestController extends Controller
 
         $newRequest = $service->create($data);
 
-        return response()->json($newRequest, 201);
+        return new RequestResource($newRequest);
     }
 
     public function updateStatus(Request $request, RequestModel $requestModel)
