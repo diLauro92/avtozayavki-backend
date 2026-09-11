@@ -17,7 +17,6 @@ class RequestObserver
             'old_status' => null,
             'new_status' => $request->status,
             'changed_by' => null,
-            'created_at' => now(),
         ]);
     }
 

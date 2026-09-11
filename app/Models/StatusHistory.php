@@ -12,8 +12,7 @@ class StatusHistory extends Model
         'old_status',
         'new_status',
         'changed_by',
-        'created_at',
     ];
 
-    public $timestamps = false;
+    const UPDATED_AT = null;
 }
