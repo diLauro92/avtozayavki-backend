@@ -82,8 +82,15 @@ class RequestConversation extends Conversation
 
     public function handleUrgency(Nutgram $bot)
     {
-        $this->urgency = $bot->callbackQuery()->data;
-        $bot->answerCallbackQuery();
+        $urgency = $this->buttonAnswer($bot, ['today', 'soon', 'planned', 'emergency']);
+
+        if ($urgency === null) {
+            $bot->sendMessage('Выберите срочность кнопкой выше.');
+
+            return;
+        }
+
+        $this->urgency = $urgency;
 
         $summary = $this->buildSummary();
 
@@ -121,10 +128,28 @@ class RequestConversation extends Conversation
         };
     }
 
+    protected function buttonAnswer(Nutgram $bot, array $allowed): ?string
+    {
+        if (! $bot->isCallbackQuery()) {
+            return null;
+        }
+
+        $bot->answerCallbackQuery();
+
+        $data = $bot->callbackQuery()->data;
+
+        return in_array($data, $allowed, true) ? $data : null;
+    }
+
     public function handleConfirm(Nutgram $bot)
     {
-        $bot->answerCallbackQuery();
-        $choice = $bot->callbackQuery()->data;
+        $choice = $this->buttonAnswer($bot, ['confirm', 'cancel']);
+
+        if ($choice === null) {
+            $bot->sendMessage('Нажмите «Отправить» или «Отменить» под заявкой.');
+
+            return;
+        }
 
         if ($choice === 'cancel') {
             $bot->sendMessage('Заявка отменена. Напишите /start, чтобы начать заново.');
