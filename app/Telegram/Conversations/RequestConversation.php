@@ -26,7 +26,15 @@ class RequestConversation extends Conversation
 
     public function askPhone(Nutgram $bot)
     {
-        $this->clientName = $bot->message()->text;
+        $name = $this->textAnswer($bot);
+
+        if ($name === null) {
+            $bot->sendMessage('Напишите, пожалуйста, имя текстом.');
+
+            return;
+        }
+
+        $this->clientName = mb_substr($name, 0, 255);
 
         $bot->sendMessage('Укажите номер телефона.');
 
@@ -35,7 +43,7 @@ class RequestConversation extends Conversation
 
     public function askCar(Nutgram $bot)
     {
-        $phone = preg_replace('/\D/', '', $bot->message()->text);
+        $phone = preg_replace('/\D/', '', $this->textAnswer($bot) ?? '');
 
         if (strlen($phone) < 10) {
             $bot->sendMessage('Похоже, номер неполный. Введите телефон ещё раз.');
@@ -53,8 +61,15 @@ class RequestConversation extends Conversation
 
     public function askProblem(Nutgram $bot)
     {
-        $car = $bot->message()->text;
-        $this->carInfo = $car === '-' ? null : $car;
+        $car = $this->textAnswer($bot);
+
+        if ($car === null) {
+            $bot->sendMessage('Напишите марку и модель текстом или «-», чтобы пропустить.');
+
+            return;
+        }
+
+        $this->carInfo = $car === '-' ? null : mb_substr($car, 0, 255);
 
         $bot->sendMessage('Опишите проблему.');
 
@@ -63,7 +78,15 @@ class RequestConversation extends Conversation
 
     public function askUrgency(Nutgram $bot)
     {
-        $this->problem = $bot->message()->text;
+        $problem = $this->textAnswer($bot);
+
+        if ($problem === null) {
+            $bot->sendMessage('Пока принимаю только текст - опишите проблему словами.');
+
+            return;
+        }
+
+        $this->problem = $problem;
 
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
@@ -126,6 +149,19 @@ class RequestConversation extends Conversation
             'emergency' => 'Аварийно',
             default => '—',
         };
+    }
+
+    protected function textAnswer(Nutgram $bot): ?string
+    {
+        if ($bot->isCallbackQuery()) {
+            $bot->answerCallbackQuery();
+
+            return null;
+        }
+
+        $text = trim($bot->message()?->text ?? '');
+
+        return $text === '' ? null : $text;
     }
 
     protected function buttonAnswer(Nutgram $bot, array $allowed): ?string
