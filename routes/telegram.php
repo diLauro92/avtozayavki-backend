@@ -9,6 +9,10 @@ $bot->onCommand('start', function (Nutgram $bot) {
     RequestConversation::begin($bot);
 });
 
+$bot->onCommand('id', function (Nutgram $bot) {
+    $bot->sendMessage("Ваш chat_id: {$bot->chatId()}");
+});
+
 $bot->onException(function (Nutgram $bot, Throwable $exception) {
     report($exception);
 
