@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RequestController;
 use App\Http\Controllers\Api\AuthController;
+use SergiX44\Nutgram\Nutgram;
 
 Route::middleware('auth:sanctum')->group(function () {
     // всё внутри требует залогиненности
@@ -21,3 +22,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // вне группы — только login
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/webhook', fn (Nutgram $bot) => $bot->run());
