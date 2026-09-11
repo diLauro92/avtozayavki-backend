@@ -4,7 +4,10 @@ namespace App\Services;
 
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use App\Notifications\NewRequestNotification;
 use RuntimeException;
+
+use function Illuminate\Support\defer;
 
 class RequestService
 {
@@ -13,6 +16,8 @@ class RequestService
         $data['responsible_id'] ??= $this->defaultResponsibleId();
 
         $request = RequestModel::create($data);
+
+        defer(fn () => $request->responsible?->notify(new NewRequestNotification($request)));
 
         return $request;
     }

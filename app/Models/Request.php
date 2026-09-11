@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Observers\RequestObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 #[ObservedBy(RequestObserver::class)]
 class Request extends Model
 {
@@ -34,5 +36,10 @@ class Request extends Model
 
     public function statusHistory() {
         return $this->hasMany(StatusHistory::class);
+    }
+
+    public function responsible(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsible_id');
     }
 }

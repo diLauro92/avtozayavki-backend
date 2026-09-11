@@ -27,6 +27,12 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'telegram_chat_id' => 'integer',
         ];
+    }
+
+    public function routeNotificationForTelegram(): ?int
+    {
+        return $this->telegram_chat_id;
     }
 }
