@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Request as RequestModel;
 use App\Models\User;
 use App\Notifications\NewRequestNotification;
+use App\Support\Phone;
 use RuntimeException;
 
 use function Illuminate\Support\defer;
@@ -13,6 +14,10 @@ class RequestService
 {
     public function create(array $data): RequestModel
     {
+        if (isset($data['phone'])) {
+            $data['phone'] = Phone::normalize($data['phone']) ?? $data['phone'];
+        }
+
         $data['responsible_id'] ??= $this->defaultResponsibleId();
 
         $request = RequestModel::create($data);

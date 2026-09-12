@@ -7,6 +7,7 @@ use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
+use App\Support\Phone;
 
 class RequestConversation extends Conversation
 {
@@ -43,11 +44,10 @@ class RequestConversation extends Conversation
 
     public function askCar(Nutgram $bot)
     {
-        $phone = preg_replace('/\D/', '', $this->textAnswer($bot) ?? '');
+        $phone = Phone::normalize($this->textAnswer($bot));
 
-        if (strlen($phone) < 10) {
-            $bot->sendMessage('Похоже, номер неполный. Введите телефон ещё раз.');
-            $this->next('askCar');
+        if ($phone === null) {
+            $bot->sendMessage('Не похоже на номер. Введите телефон в формате +7 999 123-45-67.');
 
             return;
         }
