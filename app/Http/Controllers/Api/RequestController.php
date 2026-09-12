@@ -22,6 +22,12 @@ class RequestController extends Controller
     // GET /api/requests/{id} — одна заявка
     public function show(RequestModel $request)
     {
+        $request->load([
+            'responsible',
+            'statusHistory' => fn ($query) => $query->orderBy('id'),
+            'statusHistory.changedBy',
+        ]);
+
         return new RequestResource($request);
     }
 

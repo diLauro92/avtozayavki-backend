@@ -29,6 +29,11 @@ class RequestResource extends JsonResource
             'next_contact_at' => $this->next_contact_at,
             'request_type' => $this->request_type,
             'created_at' => $this->created_at,
+            'responsible' => $this->whenLoaded('responsible', fn () => [
+                'id' => $this->responsible->id,
+                'name' => $this->responsible->name,
+            ]),
+            'status_history' => StatusHistoryResource::collection($this->whenLoaded('statusHistory')),
             'updated_at' => $this->updated_at,
         ];
     }
