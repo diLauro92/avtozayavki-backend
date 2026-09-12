@@ -32,6 +32,8 @@ class Request extends Model
     protected $casts = [
         'files' => 'array',
         'next_contact_at' => 'datetime',
+        'reminded_at' => 'datetime',
+        'escalated_at' => 'datetime',
     ];
 
     public function statusHistory() {
