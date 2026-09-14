@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CommentResource;
 use App\Http\Resources\RequestResource;
 use App\Models\Request as RequestModel;
 use App\Services\RequestService;
@@ -26,6 +27,8 @@ class RequestController extends Controller
             'responsible',
             'statusHistory' => fn ($query) => $query->orderBy('id'),
             'statusHistory.changedBy',
+            'comments' => fn ($query) => $query->orderBy('id'),
+            'comments.author',
         ]);
 
         return new RequestResource($request);
@@ -61,6 +64,34 @@ class RequestController extends Controller
         ]);
 
         $requestModel->update($data);
+
+        return new RequestResource($requestModel);
+    }
+
+    public function storeComment(Request $request, RequestModel $requestModel)
+    {
+        $data = $request->validate([
+            'body' => 'required|string|max:5000',
+        ]);
+
+        $comment = $requestModel->comments()->create([
+            'body' => $data['body'],
+            'author_id' => $request->user()->id,
+        ]);
+
+        return new CommentResource($comment->load('author'));
+    }
+
+    public function updateNextContact(Request $request, RequestModel $requestModel)
+    {
+        $data = $request->validate([
+            'next_contact_at' => 'nullable|date',
+        ]);
+
+        $requestModel->update([
+            'next_contact_at' => $data['next_contact_at'],
+            'next_contact_reminded_at' => null,
+        ]);
 
         return new RequestResource($requestModel);
     }

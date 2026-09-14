@@ -16,6 +16,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/requests/{request}', [RequestController::class, 'show']);
     Route::post('/requests', [RequestController::class, 'store']);
     Route::patch('/requests/{requestModel}/status', [RequestController::class, 'updateStatus']);
+    Route::post('/requests/{requestModel}/comments', [RequestController::class, 'storeComment']);
+    Route::patch('/requests/{requestModel}/next-contact', [RequestController::class, 'updateNextContact']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });

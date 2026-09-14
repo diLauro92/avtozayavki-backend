@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use App\Notifications\NextContactNotification;
 use App\Notifications\OverdueRequestNotification;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Notification;
@@ -39,6 +40,15 @@ class CheckOverdueRequests extends Command
             $this->sendOverdue($request, escalation: false);
         }
 
+        $toRemindNextContact = RequestModel::whereNotNull('next_contact_at')
+        ->whereNull('next_contact_reminded_at')
+            ->where('next_contact_at', '<=', now())
+            ->get();
+
+        foreach ($toRemindNextContact as $request) {
+            $this->sendNextContact($request);
+        }
+
         return self::SUCCESS;
     }
 
@@ -69,5 +79,29 @@ class CheckOverdueRequests extends Command
         $request->forceFill($marks)->saveQuietly();
 
         $this->info("#{$request->id}: " . ($escalation ? 'эскалация' : 'напоминание'));
+    }
+
+    private function sendNextContact(RequestModel $request): void
+    {
+        $responsible = $request->responsible;
+
+        if ($responsible === null) {
+            $request->forceFill(['next_contact_reminded_at' => now()])->saveQuietly();
+
+            return;
+        }
+
+        try {
+            $responsible->notify(new NextContactNotification($request));
+        } catch (Throwable $e) {
+            report($e);
+            $this->error("#{$request->id}: напоминание о звонке не отправлено, повторим через минуту");
+
+            return;
+        }
+
+        $request->forceFill(['next_contact_reminded_at' => now()])->saveQuietly();
+
+        $this->info("#{$request->id}: напоминание о звонке");
     }
 }
