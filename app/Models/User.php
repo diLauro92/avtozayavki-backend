@@ -28,6 +28,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'telegram_chat_id' => 'integer',
+            'telegram_link_expires_at' => 'datetime',
         ];
     }
 

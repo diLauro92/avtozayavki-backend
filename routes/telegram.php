@@ -2,8 +2,35 @@
 
 use App\Telegram\Conversations\RequestConversation;
 use SergiX44\Nutgram\Nutgram;
+use App\Services\TelegramLinkService;
+use Illuminate\Support\Str;
 
 $bot = app(Nutgram::class);
+
+$bot->onCommand('start {payload}', function (Nutgram $bot, string $payload) {
+    if (! str_starts_with($payload, TelegramLinkService::LINK_PREFIX)) {
+        RequestConversation::begin($bot);
+
+        return;
+    }
+
+    $chatId = $bot->chatId();
+
+    if ($chatId === null) {
+        return;
+    }
+
+    $code = Str::after($payload, TelegramLinkService::LINK_PREFIX);
+    $user = app(TelegramLinkService::class)->linkByCode($code, $chatId);
+
+    if ($user === null) {
+        $bot->sendMessage('Ссылка недействительна или устарела. Запросите новую в личном кабинете.');
+
+        return;
+    }
+
+    $bot->sendMessage("Готово, {$user->name}. Уведомления о заявках будут приходить сюда.");
+});
 
 $bot->onCommand('start', function (Nutgram $bot) {
     RequestConversation::begin($bot);
