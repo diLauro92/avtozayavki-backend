@@ -4,8 +4,8 @@ return [
     // The Telegram BOT api token
     'token' => env('TELEGRAM_TOKEN'),
 
-    // if the webhook mode must validate the incoming IP range is from a telegram server
-    'safe_mode' => false,
+    // проверка секретного заголовка от Telegram
+    'safe_mode' => env('TELEGRAM_SAFE_MODE', true),
 
     // Extra or specific configurations
     'config' => [
