@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\TelegramLinkController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RequestController;
@@ -18,6 +19,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/requests/{requestModel}/status', [RequestController::class, 'updateStatus']);
     Route::post('/requests/{requestModel}/comments', [RequestController::class, 'storeComment']);
     Route::patch('/requests/{requestModel}/next-contact', [RequestController::class, 'updateNextContact']);
+    Route::post('/telegram/link', [TelegramLinkController::class, 'store']);
+    Route::delete('/telegram/link', [TelegramLinkController::class, 'destroy']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });
