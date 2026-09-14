@@ -3,9 +3,9 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-if [[ -n "$(git status --porcelain)" ]]; then
+if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
   echo "Есть незакоммиченные изменения. Деплой остановлен."
-  git status --short
+  git status --short --untracked-files=no
   exit 1
 fi
 
