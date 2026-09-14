@@ -35,7 +35,7 @@ class OverdueRequestNotification extends Notification
             'Проблема: ' . Str::limit($request->problem, 200),
             'Ответственный: ' . ($request->responsible?->name ?? 'не назначен'),
             '',
-            config('app.url'),
+            config('app.url') . "/requests/{$request->id}",
         ]);
     }
 }

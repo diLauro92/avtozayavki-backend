@@ -30,7 +30,7 @@ class NewRequestNotification extends Notification
             'Срочность: ' . $this->urgencyLabel(),
             'Источник: ' . ($request->source === 'telegram' ? 'Telegram' : 'Ручной ввод'),
             '',
-            config('app.url'),
+            config('app.url') . "/requests/{$request->id}",
         ]);
     }
 
