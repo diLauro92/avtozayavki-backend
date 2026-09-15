@@ -35,6 +35,7 @@ class RequestResource extends JsonResource
             ]),
             'status_history' => StatusHistoryResource::collection($this->whenLoaded('statusHistory')),
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
+            'photos' => PhotoResource::collection($this->whenLoaded('photos')),
             'updated_at' => $this->updated_at,
         ];
     }

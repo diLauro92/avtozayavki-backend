@@ -52,4 +52,9 @@ class Request extends Model
     {
         return $this->morphMany(Comment::class, 'commentable');
     }
+
+    public function photos(): MorphMany
+    {
+        return $this->morphMany(Photo::class, 'photoable');
+    }
 }

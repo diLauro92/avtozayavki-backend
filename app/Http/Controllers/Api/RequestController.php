@@ -30,6 +30,7 @@ class RequestController extends Controller
             'statusHistory.changedBy',
             'comments' => fn ($query) => $query->orderBy('id'),
             'comments.author',
+            'photos' => fn ($query) => $query->orderBy('id'),
         ]);
 
         return new RequestResource($request);

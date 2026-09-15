@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RequestController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PhotoController;
 use SergiX44\Nutgram\Nutgram;
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -20,6 +21,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/requests/{requestModel}/comments', [RequestController::class, 'storeComment']);
     Route::patch('/requests/{requestModel}/next-contact', [RequestController::class, 'updateNextContact']);
     Route::get('/requests/{requestModel}/history', [RequestController::class, 'history']);
+    Route::get('/photos/{photo}', [PhotoController::class, 'show']);
+    Route::get('/photos/{photo}/thumb', [PhotoController::class, 'thumb']);
     Route::post('/telegram/link', [TelegramLinkController::class, 'store']);
     Route::delete('/telegram/link', [TelegramLinkController::class, 'destroy']);
 
