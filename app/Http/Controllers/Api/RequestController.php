@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentResource;
+use App\Http\Resources\RequestHistoryResource;
 use App\Http\Resources\RequestResource;
 use App\Models\Request as RequestModel;
 use App\Services\RequestService;
@@ -32,6 +33,19 @@ class RequestController extends Controller
         ]);
 
         return new RequestResource($request);
+    }
+
+    // GET /api/requests/{requestModel}/history — прошлые заявки с того же телефона
+    public function history(RequestModel $requestModel)
+    {
+        $query = RequestModel::query()
+            ->where('phone', $requestModel->phone)
+            ->whereKeyNot($requestModel->getKey());
+
+        $items = (clone $query)->orderByDesc('id')->limit(5)->get();
+
+        return RequestHistoryResource::collection($items)
+            ->additional(['total' => $query->count()]);
     }
 
     // POST /api/requests — создать заявку

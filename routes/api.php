@@ -19,6 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/requests/{requestModel}/status', [RequestController::class, 'updateStatus']);
     Route::post('/requests/{requestModel}/comments', [RequestController::class, 'storeComment']);
     Route::patch('/requests/{requestModel}/next-contact', [RequestController::class, 'updateNextContact']);
+    Route::get('/requests/{requestModel}/history', [RequestController::class, 'history']);
     Route::post('/telegram/link', [TelegramLinkController::class, 'store']);
     Route::delete('/telegram/link', [TelegramLinkController::class, 'destroy']);
 
