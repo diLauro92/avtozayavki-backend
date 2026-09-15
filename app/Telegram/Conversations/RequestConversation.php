@@ -2,20 +2,26 @@
 
 namespace App\Telegram\Conversations;
 
+use App\Services\PhotoService;
 use App\Services\RequestService;
+use App\Support\Phone;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
-use App\Support\Phone;
+
+use function Illuminate\Support\defer;
 
 class RequestConversation extends Conversation
 {
+    private const MAX_PHOTOS = 10;
+
     public ?string $clientName = null;
     public ?string $phone = null;
     public ?string $carInfo = null;
     public ?string $problem = null;
     public ?string $urgency = null;
+    public array $photoFileIds = [];
 
     public function start(Nutgram $bot)
     {
@@ -73,10 +79,10 @@ class RequestConversation extends Conversation
 
         $bot->sendMessage('Опишите проблему.');
 
-        $this->next('askUrgency');
+        $this->next('askPhoto');
     }
 
-    public function askUrgency(Nutgram $bot)
+    public function askPhoto(Nutgram $bot)
     {
         $problem = $this->textAnswer($bot);
 
@@ -88,19 +94,48 @@ class RequestConversation extends Conversation
 
         $this->problem = $problem;
 
-        $keyboard = InlineKeyboardMarkup::make()
-            ->addRow(
-                InlineKeyboardButton::make('Сегодня', callback_data: 'today'),
-                InlineKeyboardButton::make('1–2 дня', callback_data: 'soon'),
-            )
-            ->addRow(
-                InlineKeyboardButton::make('Планово', callback_data: 'planned'),
-                InlineKeyboardButton::make('Аварийно', callback_data: 'emergency'),
-            );
+        $bot->sendMessage(
+            'Пришлите фото, если есть - так мастеру будет понятнее. Можно несколько, по одному снимку.',
+            reply_markup: $this->photoKeyboard(),
+        );
 
-        $bot->sendMessage('Насколько срочно?', reply_markup: $keyboard);
+        $this->next('handlePhoto');
+    }
 
-        $this->next('handleUrgency');
+    public function handlePhoto(Nutgram $bot)
+    {
+        if ($bot->isCallbackQuery()) {
+            if ($this->buttonAnswer($bot, ['photo_done']) === null) {
+                return;
+            }
+
+            $this->sendUrgency($bot);
+
+            $this->next('handleUrgency');
+
+            return;
+        }
+
+        $sizes = $bot->message()?->photo;
+
+        if (empty($sizes)) {
+            $bot->sendMessage('Пришлите именно фото, не файлом. Или нажмите кнопку под сообщением выше.');
+
+            return;
+        }
+
+        if (count($this->photoFileIds) >= self::MAX_PHOTOS) {
+            $bot->sendMessage('Уже достаточно фото, больше не нужно. Нажмите «Готово».');
+
+            return;
+        }
+
+        $this->photoFileIds[] = end($sizes)->file_id;
+
+        $bot->sendMessage(
+            'Фото ' . count($this->photoFileIds) . ' принято. Пришлите ещё или нажмите «Готово».',
+            reply_markup: $this->photoKeyboard(),
+        );
     }
 
     public function handleUrgency(Nutgram $bot)
@@ -128,6 +163,29 @@ class RequestConversation extends Conversation
         $this->next('handleConfirm');
     }
 
+    protected function sendUrgency(Nutgram $bot): void
+    {
+        $keyboard = InlineKeyboardMarkup::make()
+            ->addRow(
+                InlineKeyboardButton::make('Сегодня', callback_data: 'today'),
+                InlineKeyboardButton::make('1–2 дня', callback_data: 'soon'),
+            )
+            ->addRow(
+                InlineKeyboardButton::make('Планово', callback_data: 'planned'),
+                InlineKeyboardButton::make('Аварийно', callback_data: 'emergency'),
+            );
+
+        $bot->sendMessage('Насколько срочно?', reply_markup: $keyboard);
+    }
+
+    protected function photoKeyboard(): InlineKeyboardMarkup
+    {
+        $label = $this->photoFileIds === [] ? 'Без фото' : 'Готово';
+
+        return InlineKeyboardMarkup::make()
+            ->addRow(InlineKeyboardButton::make($label, callback_data: 'photo_done'));
+    }
+
     protected function buildSummary(): string
     {
         $lines = ['Проверьте заявку:', ''];
@@ -136,6 +194,7 @@ class RequestConversation extends Conversation
         $lines[] = 'Авто: ' . ($this->carInfo ?? '—');
         $lines[] = 'Проблема: ' . $this->problem;
         $lines[] = 'Срочность: ' . $this->urgencyLabel();
+        $lines[] = 'Фото: ' . (count($this->photoFileIds) ?: '—');
 
         return implode("\n", $lines);
     }
@@ -202,6 +261,12 @@ class RequestConversation extends Conversation
             'car_info' => $this->carInfo,
             'urgency' => $this->urgency,
         ]);
+
+        $fileIds = $this->photoFileIds;
+
+        if ($fileIds !== []) {
+            defer(fn () => app(PhotoService::class)->storeFromTelegram($bot, $fileIds, $request));
+        }
 
         $bot->sendMessage("Заявка №{$request->id} принята! С вами свяжутся.");
 
