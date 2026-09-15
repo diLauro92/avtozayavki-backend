@@ -132,6 +132,8 @@ class RequestConversation extends Conversation
 
         $this->photoFileIds[] = end($sizes)->file_id;
 
+        $this->next('handlePhoto');
+
         $bot->sendMessage(
             'Фото ' . count($this->photoFileIds) . ' принято. Пришлите ещё или нажмите «Готово».',
             reply_markup: $this->photoKeyboard(),
