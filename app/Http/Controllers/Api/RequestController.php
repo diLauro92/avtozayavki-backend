@@ -61,7 +61,6 @@ class RequestController extends Controller
             'client_name' => 'nullable|string|max:255',
             'car_info' => 'nullable|string|max:255',
             'urgency' => 'nullable|string|in:today,soon,planned,emergency',
-            'files' => 'nullable|array',
         ], [
             'phone.required' => 'Укажите телефон в формате +7 999 123-45-67.',
             'phone.regex' => 'Укажите телефон в формате +7 999 123-45-67.',

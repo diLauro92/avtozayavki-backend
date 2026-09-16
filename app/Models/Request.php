@@ -22,17 +22,14 @@ class Request extends Model
         'car_info',
         'problem',
         'urgency',
-        'files',
         'status',
         'responsible_id',
-        'comment',
         'next_contact_at',
         'request_type',
         'next_contact_reminded_at',
     ];
 
     protected $casts = [
-        'files' => 'array',
         'next_contact_at' => 'datetime',
         'reminded_at' => 'datetime',
         'escalated_at' => 'datetime',
