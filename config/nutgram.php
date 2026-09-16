@@ -9,7 +9,10 @@ return [
 
     // Extra or specific configurations
     'config' => [
-        'timeout' => 30,
+        'timeout' => (int) env('TELEGRAM_TIMEOUT', 30),
+        'client' => array_filter([
+            'proxy' => env('TELEGRAM_PROXY'),
+        ]),
     ],
 
     // Set if the service provider should automatically load
