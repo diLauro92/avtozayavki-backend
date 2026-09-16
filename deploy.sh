@@ -29,4 +29,7 @@ php artisan route:cache
 echo "→ Перезагружаю PHP-FPM"
 sudo systemctl reload php8.5-fpm
 
+echo "→ Перезапускаю Telegram-бота"
+sudo systemctl restart tg-bot
+
 echo "✓ Готово: $(git log --oneline -1)"
