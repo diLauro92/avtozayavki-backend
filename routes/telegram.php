@@ -2,6 +2,7 @@
 
 use App\Telegram\Conversations\RequestConversation;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Properties\UpdateType;
 use App\Services\TelegramLinkService;
 use Illuminate\Support\Str;
 
@@ -38,6 +39,14 @@ $bot->onCommand('start', function (Nutgram $bot) {
 
 $bot->onCommand('id', function (Nutgram $bot) {
     $bot->sendMessage("Ваш chat_id: {$bot->chatId()}");
+});
+
+$bot->fallbackOn(UpdateType::MESSAGE, function (Nutgram $bot) {
+    if (! $bot->chat()?->isPrivate()) {
+        return;
+    }
+
+    $bot->sendMessage('Я принимаю заявки через короткую анкету. Нажмите /start, чтобы начать.');
 });
 
 $bot->onException(function (Nutgram $bot, Throwable $exception) {
