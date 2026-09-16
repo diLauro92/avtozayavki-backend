@@ -4,11 +4,13 @@ namespace App\Notifications;
 
 use App\Models\Request as RequestModel;
 use App\Notifications\Channels\TelegramChannel;
+use App\Notifications\Concerns\DescribesClient;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Str;
 
 class NextContactNotification extends Notification
 {
+    use DescribesClient;
+
     public function __construct(private RequestModel $request) {}
 
     public function via(object $notifiable): array
@@ -28,9 +30,7 @@ class NextContactNotification extends Notification
             "📞 Пора перезвонить по заявке #{$request->id}",
             '',
             'Время: ' . $time,
-            'Имя: ' . ($request->client_name ?? '-'),
-            'Телефон: ' . $request->phone,
-            'Проблема: ' . Str::limit($request->problem, 200),
+            ...$this->clientLines($request, TelegramChannel::FOREIGN, 200),
             '',
             config('app.url') . "/requests/{$request->id}",
         ]);

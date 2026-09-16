@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Enums\RequestSource;
 use App\Http\Resources\CommentResource;
 use App\Http\Resources\RequestHistoryResource;
 use App\Http\Resources\RequestResource;
 use App\Models\Request as RequestModel;
 use App\Services\RequestService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Support\Phone;
 
 class RequestController extends Controller
@@ -55,7 +57,7 @@ class RequestController extends Controller
         $request->merge(['phone' => Phone::normalize($request->input('phone'))]);
 
         $data = $request->validate([
-            'source' => 'required|string',
+            'source' => ['required', Rule::enum(RequestSource::class)],
             'phone' => ['required', 'regex:/^7\d{10}$/'],
             'problem' => 'required|string|max:5000',
             'client_name' => 'nullable|string|max:255',

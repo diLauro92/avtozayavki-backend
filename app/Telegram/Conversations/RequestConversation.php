@@ -2,6 +2,7 @@
 
 namespace App\Telegram\Conversations;
 
+use App\Enums\RequestSource;
 use App\Services\PhotoService;
 use App\Services\RequestService;
 use App\Support\Phone;
@@ -254,7 +255,7 @@ class RequestConversation extends Conversation
         }
 
         $request = app(RequestService::class)->create([
-            'source' => 'telegram',
+            'source' => RequestSource::Telegram,
             'phone' => $this->phone,
             'problem' => $this->problem,
             'client_name' => $this->clientName,

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Observers\RequestObserver;
+use App\Enums\RequestSource;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,6 +31,7 @@ class Request extends Model
     ];
 
     protected $casts = [
+        'source' => RequestSource::class,
         'next_contact_at' => 'datetime',
         'reminded_at' => 'datetime',
         'escalated_at' => 'datetime',
