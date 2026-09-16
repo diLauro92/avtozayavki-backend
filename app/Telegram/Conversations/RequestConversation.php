@@ -10,8 +10,6 @@ use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-use function Illuminate\Support\defer;
-
 class RequestConversation extends Conversation
 {
     private const MAX_PHOTOS = 10;
@@ -266,12 +264,12 @@ class RequestConversation extends Conversation
 
         $fileIds = $this->photoFileIds;
 
-        if ($fileIds !== []) {
-            defer(fn () => app(PhotoService::class)->storeFromTelegram($bot, $fileIds, $request));
-        }
-
         $bot->sendMessage("Заявка №{$request->id} принята! С вами свяжутся.");
 
         $this->end();
+
+        if ($fileIds !== []) {
+            app(PhotoService::class)->storeFromTelegram($bot, $fileIds, $request);
+        }
     }
 }

@@ -8,8 +8,6 @@ use App\Notifications\NewRequestNotification;
 use App\Support\Phone;
 use RuntimeException;
 
-use function Illuminate\Support\defer;
-
 class RequestService
 {
     public function create(array $data): RequestModel
@@ -22,7 +20,7 @@ class RequestService
 
         $request = RequestModel::create($data);
 
-        defer(fn () => $request->responsible?->notify(new NewRequestNotification($request)));
+        $request->responsible?->notify(new NewRequestNotification($request));
 
         return $request;
     }
