@@ -12,12 +12,16 @@ class AuthController extends Controller
 {
     public function login(Request $request): JsonResponse
     {
-        $credentials = $request->validate([
+        $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
+            'remember' => ['sometimes', 'boolean'],
         ]);
 
-        if (!Auth::attempt($credentials)) {
+        // Только email и пароль: остальные ключи провайдер превратит в where
+        $credentials = $request->only('email', 'password');
+
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([
                 'email' => 'Неверный email или пароль',
             ]);
@@ -30,11 +34,13 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        Auth::guard('web')->logout(); // разлогинить веб-guard (рвёт аутентификацию сессии)
+        // Выход только на этом устройстве: полный logout меняет remember_token
+        // и разлогинивает пользователя везде
+        Auth::guard('web')->logoutCurrentDevice();
 
-        $request->session()->invalidate(); // уничтожить данные сессии
-        $request->session()->regenerateToken(); // новый CSRF-токен (защита)
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return response() ->json(['message' => 'Logged out']);
+        return response()->json(['message' => 'Logged out']);
     }
 }
