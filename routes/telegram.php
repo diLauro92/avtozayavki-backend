@@ -1,16 +1,16 @@
 <?php
 
-use App\Telegram\Conversations\RequestConversation;
+use App\Services\TelegramLinkService;
+use App\Telegram\TelegramWizard;
+use Illuminate\Support\Str;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Properties\UpdateType;
-use App\Services\TelegramLinkService;
-use Illuminate\Support\Str;
 
 $bot = app(Nutgram::class);
 
 $bot->onCommand('start {payload}', function (Nutgram $bot, string $payload) {
     if (! str_starts_with($payload, TelegramLinkService::LINK_PREFIX)) {
-        RequestConversation::begin($bot);
+        app(TelegramWizard::class)->start($bot);
 
         return;
     }
@@ -34,7 +34,7 @@ $bot->onCommand('start {payload}', function (Nutgram $bot, string $payload) {
 });
 
 $bot->onCommand('start', function (Nutgram $bot) {
-    RequestConversation::begin($bot);
+    app(TelegramWizard::class)->start($bot);
 });
 
 $bot->onCommand('id', function (Nutgram $bot) {
@@ -42,11 +42,20 @@ $bot->onCommand('id', function (Nutgram $bot) {
 });
 
 $bot->fallbackOn(UpdateType::MESSAGE, function (Nutgram $bot) {
+    if (app(TelegramWizard::class)->handle($bot)) {
+        return;
+    }
+
     if (! $bot->chat()?->isPrivate()) {
         return;
     }
 
     $bot->sendMessage('Я принимаю заявки через короткую анкету. Нажмите /start, чтобы начать.');
+});
+
+// Все кнопки бота сейчас принадлежат анкете
+$bot->onCallbackQuery(function (Nutgram $bot) {
+    app(TelegramWizard::class)->handle($bot);
 });
 
 $bot->onException(function (Nutgram $bot, Throwable $exception) {
@@ -56,6 +65,9 @@ $bot->onException(function (Nutgram $bot, Throwable $exception) {
         return;
     }
 
+    app(TelegramWizard::class)->reset($bot);
+
+    // Страховка переезда: удаляет разговор старого визарда, если он остался в кэше
     $bot->endConversation();
 
     try {
