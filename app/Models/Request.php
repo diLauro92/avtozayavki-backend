@@ -18,6 +18,7 @@ class Request extends Model
     ];
     protected $fillable = [
         'source',
+        'consent_version',
         'client_name',
         'phone',
         'car_info',

@@ -9,6 +9,7 @@ use App\Wizard\Input;
 use App\Wizard\Reply;
 use App\Wizard\Scenario;
 use App\Wizard\Scenarios\AutoService;
+use App\Wizard\Steps\ConsentStep;
 use App\Wizard\Steps\TextStep;
 use App\Wizard\WizardEngine;
 use App\Wizard\WizardState;
@@ -63,6 +64,7 @@ class WizardEngineTest extends TestCase
                 'car_info' => null,
                 'problem' => 'Не заводится',
                 'urgency' => 'soon',
+                'consent_version' => '2026-09-17',
                 'source' => RequestSource::Telegram,
             ])
             ->willReturn($request);
@@ -83,6 +85,7 @@ class WizardEngineTest extends TestCase
             Input::button('photo_done'),
             Input::button('soon'),
             Input::text('да'),
+            Input::button(ConsentStep::ACCEPT),
             Input::button('confirm'),
         ];
 
@@ -102,8 +105,9 @@ class WizardEngineTest extends TestCase
             'Фото 1 принято. Пришлите ещё или нажмите «Готово».',
             'Фото 2 принято. Пришлите ещё или нажмите «Готово».',
             'Насколько срочно?',
+            "Остался последний шаг. Отправляя заявку, вы соглашаетесь на обработку ваших данных:\n\nСогласие: https://24leadhub.ru/consent\nПолитика: https://24leadhub.ru/privacy\nУсловия: https://24leadhub.ru/terms",
+            'Чтобы продолжить, нажмите «Принимаю» под сообщением.',
             "Проверьте заявку:\n\nИмя: Пётр\nТелефон: 79161234567\nАвто: -\nПроблема: Не заводится\nСрочность: 1–2 дня\nФото: 2",
-            'Нажмите «Отправить» или «Отменить» под заявкой.',
             'Заявка №42 принята! С вами свяжутся.',
         ], $texts);
         $this->assertNull($result->state);

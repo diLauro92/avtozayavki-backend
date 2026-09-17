@@ -6,6 +6,7 @@ use App\Wizard\Button;
 use App\Wizard\Scenario;
 use App\Wizard\Steps\ChoiceStep;
 use App\Wizard\Steps\ConfirmStep;
+use App\Wizard\Steps\ConsentStep;
 use App\Wizard\Steps\PhoneStep;
 use App\Wizard\Steps\PhotosStep;
 use App\Wizard\Steps\TextStep;
@@ -13,6 +14,8 @@ use App\Wizard\Steps\TextStep;
 // Анкета автосервиса
 final class AutoService
 {
+    // Редакция документов на 24leadhub.ru; менять вместе с текстами страниц
+    private const CONSENT_VERSION = '2026-09-17';
     public static function make(): Scenario
     {
         $name = new TextStep(
@@ -67,6 +70,20 @@ final class AutoService
             ],
         );
 
+        $consent = new ConsentStep(
+            id: 'consent',
+            field: 'consent_version',
+            version: self::CONSENT_VERSION,
+            question: implode("\n", [
+                'Остался последний шаг. Отправляя заявку, вы соглашаетесь на обработку ваших данных:',
+                '',
+                'Согласие: https://24leadhub.ru/consent',
+                'Политика: https://24leadhub.ru/privacy',
+                'Условия: https://24leadhub.ru/terms',
+            ]),
+            retry: 'Чтобы продолжить, нажмите «Принимаю» под сообщением.',
+        );
+
         // В сводке срочность идет раньше фото, хотя спрашивается позже
         $confirm = new ConfirmStep(
             id: 'confirm',
@@ -75,7 +92,7 @@ final class AutoService
 
         return new Scenario(
             greeting: 'Здравствуйте! Оставьте заявку - я задам несколько вопросов.',
-            steps: [$name, $phone, $car, $problem, $photos, $urgency, $confirm],
+            steps: [$name, $phone, $car, $problem, $photos, $urgency, $consent, $confirm],
             submitted: 'Заявка №{id} принята! С вами свяжутся.',
             cancelled: 'Заявка отменена. Напишите /start, чтобы начать заново.',
         );

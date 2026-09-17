@@ -13,6 +13,7 @@ use App\Wizard\Scenarios\AutoService;
 use App\Wizard\WizardEngine;
 use App\Wizard\WizardStore;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Types\Message\LinkPreviewOptions;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
@@ -127,6 +128,10 @@ final readonly class TelegramWizard
             }
         }
 
-        $bot->sendMessage($reply->text, reply_markup: $keyboard);
+        $bot->sendMessage(
+            $reply->text,
+            link_preview_options: LinkPreviewOptions::make(is_disabled: true),
+            reply_markup: $keyboard,
+        );
     }
 }

@@ -20,7 +20,7 @@ class AutoServiceTest extends TestCase
             $ids[] = $step->id();
         }
 
-        $this->assertSame(['name', 'phone', 'car', 'problem', 'photos', 'urgency', 'confirm'], $ids);
+        $this->assertSame(['name', 'phone', 'car', 'problem', 'photos', 'urgency', 'consent', 'confirm'], $ids);
     }
 
     public static function questions(): array
@@ -88,5 +88,18 @@ class AutoServiceTest extends TestCase
         $this->assertSame('Здравствуйте! Оставьте заявку - я задам несколько вопросов.', $scenario->greeting);
         $this->assertSame('Заявка №{id} принята! С вами свяжутся.', $scenario->submitted);
         $this->assertSame('Заявка отменена. Напишите /start, чтобы начать заново.', $scenario->cancelled);
+    }
+
+    public function test_consent_question_links_all_three_documents(): void
+    {
+        $reply = AutoService::make()->find('consent')->prompt(new WizardState('consent'));
+
+        $this->assertSame(implode("\n", [
+            'Остался последний шаг. Отправляя заявку, вы соглашаетесь на обработку ваших данных:',
+            '',
+            'Согласие: https://24leadhub.ru/consent',
+            'Политика: https://24leadhub.ru/privacy',
+            'Условия: https://24leadhub.ru/terms',
+        ]), $reply->text);
     }
 }

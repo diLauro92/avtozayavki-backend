@@ -6,6 +6,7 @@ use App\Enums\RequestSource;
 use App\Models\Request as RequestModel;
 use App\Services\PhotoService;
 use App\Services\RequestService;
+use App\Wizard\Steps\ConsentStep;
 use App\Wizard\WizardState;
 use App\Wizard\WizardStore;
 use Illuminate\Support\Facades\Exceptions;
@@ -78,9 +79,9 @@ class TelegramWizardTest extends TestCase
 
     public function test_button_press_is_answered_and_keyboard_is_sent(): void
     {
-        $this->putState(new WizardState('urgency'));
+        $this->putState(new WizardState('consent'));
 
-        $this->bot->hearCallbackQueryData('today')
+        $this->bot->hearCallbackQueryData(ConsentStep::ACCEPT)
             ->reply()
             ->assertCalled('answerCallbackQuery')
             ->assertReplyMessage(['reply_markup' => ['inline_keyboard' => [[
